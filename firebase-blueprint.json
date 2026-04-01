@@ -1,0 +1,43 @@
+{
+  "entities": {
+    "SensorReading": {
+      "title": "Sensor Reading",
+      "description": "A single data point from the ESP32 sensors.",
+      "type": "object",
+      "properties": {
+        "timestamp": { "type": "number", "description": "Unix timestamp of the reading." },
+        "temperature": { "type": "number", "description": "Temperature in Celsius." },
+        "humidity": { "type": "number", "description": "Humidity percentage." },
+        "motion": { "type": "boolean", "description": "Whether motion was detected." },
+        "lineDetected": { "type": "boolean", "description": "Whether a line was detected (KY-033)." },
+        "lightLevel": { "type": "number", "description": "Analog reading from LDR." },
+        "concentrationScore": { "type": "number", "description": "AI-calculated concentration score (0-100)." },
+        "recommendation": { "type": "string", "description": "AI-generated recommendation." },
+        "userId": { "type": "string", "description": "The UID of the user this data belongs to." }
+      },
+      "required": ["timestamp", "temperature", "humidity", "userId"]
+    },
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "User account information.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["uid", "email"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile data."
+    },
+    "/users/{userId}/readings/{readingId}": {
+      "schema": "SensorReading",
+      "description": "Historical sensor data for a specific user."
+    }
+  }
+}

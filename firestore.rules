@@ -1,0 +1,79 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: /users/{userId}
+    // Document ID: userId
+    // Fields:
+    //   - uid: string (required)
+    //   - email: string (required)
+    //   - displayName: string (optional)
+    //   - createdAt: number (optional)
+    //
+    // Collection: /users/{userId}/readings/{readingId}
+    // Document ID: auto-generated
+    // Fields:
+    //   - timestamp: number (required)
+    //   - temperature: number (required)
+    //   - humidity: number (required)
+    //   - motion: boolean (optional)
+    //   - lineDetected: boolean (optional)
+    //   - lightLevel: number (optional)
+    //   - concentrationScore: number (optional)
+    //   - recommendation: string (optional)
+    //   - userId: string (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email']) &&
+             data.uid is string &&
+             data.email is string;
+    }
+
+    function isValidReading(data) {
+      return data.keys().hasAll(['timestamp', 'temperature', 'humidity', 'userId']) &&
+             (data.timestamp is number || data.timestamp is timestamp) &&
+             data.temperature is number &&
+             data.humidity is number &&
+             data.userId is string;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "mohamedkhalil.berrais@etudiant-isi.utm.tn" && request.auth.token.email_verified == true));
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && isValidUser(request.resource.data);
+
+      match /readings/{readingId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && isValidReading(request.resource.data);
+        allow update: if false; // Readings are historical and should not be modified
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+    }
+  }
+}
