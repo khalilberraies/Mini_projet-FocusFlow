@@ -30,7 +30,7 @@ To use the full potential of FocusFlow, you will need the following hardware com
 - **DHT22:** Pin 4
 - **PIR:** Pin 17
 - **KY-033:** Pin 5
-- **LDR:** Pin 32 (Analog)
+- **LDR:** Pin 36 (Analog)
 
 *Note: You can find the ESP32 source code in the `ESP32_MQTT_Code.ino` file.*
 
