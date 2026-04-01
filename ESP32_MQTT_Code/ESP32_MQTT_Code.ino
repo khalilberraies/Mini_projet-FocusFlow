@@ -14,14 +14,14 @@
 #include <WiFiClientSecure.h>
 
 // --- CONFIGURATION ---
-const char* ssid = "MyHotspot";
+const char* ssid = "";
 const char* password = "dhch3316";
 
 // HiveMQ Cloud Settings
-const char* mqtt_server = "cf5a35658f1e496580cfdac39054baa8.s1.eu.hivemq.cloud"; // e.g. "xxxx.s1.eu.hivemq.cloud"
+const char* mqtt_server = ".s1.eu.hivemq.cloud";
 const int mqtt_port = 8883;
-const char* mqtt_user = "esp32_user";
-const char* mqtt_pass = "Concentration123!";
+const char* mqtt_user = "";
+const char* mqtt_pass = "";
 
 // MQTT Topics
 const char* topic_publish = "concentration/sensors";
