@@ -60,10 +60,10 @@ import { SensorData } from './types';
 
 // --- MQTT CONFIGURATION ---
 const MQTT_CONFIG = {
-  url: 'wss://cf5a35658f1e496580cfdac39054baa8.s1.eu.hivemq.cloud:8884/mqtt', // Replace with your Cluster URL
+  url: 'wss://.s1.eu.hivemq.cloud:8884/mqtt', // Replace with your Cluster URL
   topic: 'concentration/sensors',
-  username: 'esp32_user', // Replace with your HiveMQ username
-  password: 'Concentration123!'  // Replace with your HiveMQ password
+  username: '', // Replace with your HiveMQ username
+  password: '!'  // Replace with your HiveMQ password
 };
 
 enum OperationType {
