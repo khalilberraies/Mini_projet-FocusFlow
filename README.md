@@ -6,13 +6,17 @@
 
 ## 🌟 Key Features
 
-- **Real-time Monitoring:** Live dashboard for Temperature, Humidity, Light Intensity, and Presence.
-- **Concentration Scoring:** Instant calculation of your focus level (0-100%) based on environmental factors.
+- **Real-time Monitoring:** Live dashboard for Temperature, Humidity, Light Intensity, Sound, and Motion.
+- **Camera Presence Detection:** Uses **Local AI (MediaPipe)** to monitor if you are at your desk in real-time without sending video to the cloud.
+- **Hybrid AI Architecture:** 
+  - **Local Computer Vision:** Real-time face detection via MediaPipe.
+  - **Expert System:** Deterministic rule-based scoring for environmental factors.
+  - **Generative AI:** Integrated with **Google Gemini** for personalized focus recommendations.
+- **Concentration Scoring:** Instant calculation of your focus level (0-100%) based on 6 different sensor inputs.
 - **Focus Timer (Pomodoro):** Built-in 25-minute timer to manage your work sessions.
-- **Presence Timeline:** Visual history of your desk presence over the last hour.
+- **Noise & Motion Timelines:** Visual history of environmental distractions over the last hour.
 - **Daily Progress:** Track your total focus minutes, streaks, and session counts.
 - **Cloud Integration:** Secure data logging to Firebase Firestore and real-time communication via MQTT (HiveMQ).
-- **Responsive Design:** A sleek, dark-themed dashboard built with Tailwind CSS and Framer Motion.
 
 ---
 
@@ -25,6 +29,7 @@ To use the full potential of FocusFlow, you will need the following hardware com
 - **Motion Detection:** PIR (Passive Infrared) sensor.
 - **Noise Detection:** KY-038 Sound Sensor.
 - **Light Intensity:** LDR (Light Dependent Resistor).
+- **Presence Detection:** Any standard USB or Integrated Webcam.
 
 ### Pin Configuration (ESP32 Example)
 - **DHT22:** Pin 4
@@ -57,8 +62,12 @@ npm install
 ### 3. Configuration
 Create a `.env` file in the root directory (you can copy `.env.example`) and fill in your credentials:
 
-- **Firebase:** Update `src/firebase-applet-config.json` with your Firebase project credentials.
-- **MQTT:** Update the `MQTT_CONFIG` object in `src/App.tsx` with your HiveMQ broker URL, username, and password.
+- **Firebase:** Update `firebase-applet-config.json` with your Firebase project credentials.
+- **MQTT:** Set the following environment variables:
+  - `VITE_MQTT_URL`: Your HiveMQ Cluster URL (wss://...).
+  - `VITE_MQTT_USERNAME`: Your HiveMQ username.
+  - `VITE_MQTT_PASSWORD`: Your HiveMQ password.
+- **AI:** Set `GEMINI_API_KEY` for advanced focus recommendations.
 
 ### 4. Run the Application
 ```bash
@@ -71,7 +80,7 @@ The app will be available at `http://localhost:3000`.
 
 ## 📂 Project Structure
 
-- `src/App.tsx`: Main dashboard component and MQTT logic.
+- `src/App.tsx`: Main dashboard component, MQTT logic, and MediaPipe integration.
 - `src/services/concentrationService.ts`: Rule-based logic for focus analysis.
 - `src/firebase.ts`: Firebase initialization and configuration.
 - `ESP32_MQTT_Code.ino`: Firmware for the ESP32 microcontroller.
@@ -83,21 +92,22 @@ The app will be available at `http://localhost:3000`.
 
 1.  **Sign In:** Use your Google account to log in securely.
 2.  **Connect Hardware:** Power up your ESP32 with the provided firmware. It will start publishing data to the MQTT broker.
-3.  **Monitor Live:** Watch the dashboard update in real-time as you work.
-4.  **Analyze Focus:** The "Focus Analysis" card provides instant feedback on your environment.
-5.  **Set Timer:** Use the Focus Timer to stay on track during deep-work sessions.
-6.  **Review History:** Scroll down to see your concentration and environmental history over time.
+3.  **Enable Camera:** Switch to the "Camera" tab to initialize the local AI monitor.
+4.  **Monitor Live:** Watch the dashboard update in real-time as you work.
+5.  **Analyze Focus:** The "Focus Analysis" card provides instant feedback on your environment.
+6.  **Set Timer:** Use the Focus Timer to stay on track during deep-work sessions.
 
 ---
 
-## 🧠 Rule-Based Analysis Logic
+## 🧠 Hybrid AI Logic
 
-Unlike traditional AI models that may be slow or require API keys, FocusFlow uses a **deterministic rule-based system** for maximum reliability:
+FocusFlow uses a multi-layered AI approach for maximum reliability and privacy:
 
--   **Noise:** If the KY-038 sensor detects high ambient noise, the concentration score is reduced.
--   **Temperature:** Optimized for **20-24°C**. Points are deducted if it's too cold or too warm.
+-   **Local Computer Vision (MediaPipe):** Detects user presence. If the user is not detected for a specific period, the concentration score drops significantly.
+-   **Noise Analysis:** If the KY-038 sensor detects high ambient noise, the score is reduced.
+-   **Thermal Comfort:** Optimized for **20-24°C**. Points are deducted if it's too cold or too warm.
 -   **Lighting:** Points are deducted if the room is too dark (below 300 LDR units) or has excessive glare.
--   **Humidity:** Ideal range is **40-60%** for maximum comfort and focus.
+-   **Generative AI (Gemini):** Provides high-level coaching and environment optimization tips based on historical trends.
 
 ---
 
