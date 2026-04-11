@@ -23,14 +23,14 @@ To use the full potential of FocusFlow, you will need the following hardware com
 - **Microcontroller:** ESP32 or ESP8266.
 - **Temperature & Humidity:** DHT22 or DHT11 sensor.
 - **Motion Detection:** PIR (Passive Infrared) sensor.
-- **Desk Presence:** KY-033 Line Tracker (used as a proximity sensor).
+- **Noise Detection:** KY-038 Sound Sensor.
 - **Light Intensity:** LDR (Light Dependent Resistor).
 
 ### Pin Configuration (ESP32 Example)
 - **DHT22:** Pin 4
 - **PIR:** Pin 17
-- **KY-033:** Pin 5
-- **LDR:** Pin 36 (Analog)
+- **KY-038:** Pin 5
+- **LDR:** Pin 32 (Analog)
 
 *Note: You can find the ESP32 source code in the `ESP32_MQTT_Code.ino` file.*
 
@@ -94,7 +94,7 @@ The app will be available at `http://localhost:3000`.
 
 Unlike traditional AI models that may be slow or require API keys, FocusFlow uses a **deterministic rule-based system** for maximum reliability:
 
--   **Presence:** If the KY-033 sensor doesn't detect you at your desk, the score drops to 0.
+-   **Noise:** If the KY-038 sensor detects high ambient noise, the concentration score is reduced.
 -   **Temperature:** Optimized for **20-24°C**. Points are deducted if it's too cold or too warm.
 -   **Lighting:** Points are deducted if the room is too dark (below 300 LDR units) or has excessive glare.
 -   **Humidity:** Ideal range is **40-60%** for maximum comfort and focus.

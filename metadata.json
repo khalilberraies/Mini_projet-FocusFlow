@@ -1,5 +1,5 @@
 {
   "name": "Concentration Optimizer IoT",
-  "description": "An intelligent IoT system to monitor and optimize user concentration using ESP32, MQTT, and Firebase.",
-  "requestFramePermissions": []
+  "description": "An intelligent IoT system to monitor and optimize user concentration. Installable as a mobile app (PWA).",
+  "requestFramePermissions": ["camera"]
 }
