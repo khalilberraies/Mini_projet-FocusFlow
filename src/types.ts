@@ -3,8 +3,9 @@ export interface SensorData {
   temperature: number;
   humidity: number;
   motion: boolean;
-  lineDetected: boolean;
+  noiseDetected: boolean;
   lightLevel: number;
+  cameraPresence?: boolean;
   concentrationScore: number;
   recommendation: string;
 }
