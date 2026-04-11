@@ -3,25 +3,25 @@
   Pins:
   - DHT22: 4
   - PIR: 17
-  - KY-033: 5
+  - KY-038: 5
   - LDR: 36
 */
 
 #include <WiFi.h>
+#include <WiFiClientSecure.h>
 #include <PubSubClient.h>
 #include <DHT.h>
 #include <ArduinoJson.h>
-#include <WiFiClientSecure.h>
 
 // --- CONFIGURATION ---
-const char* ssid = "";
-const char* password = "dhch3316";
+const char* ssid = "YOUR_WIFI_SSID";
+const char* password = "YOUR_WIFI_PASSWORD";
 
 // HiveMQ Cloud Settings
-const char* mqtt_server = ".s1.eu.hivemq.cloud";
+const char* mqtt_server = "YOUR_HIVEMQ_BROKER_URL"; // e.g. "xxxx.s1.eu.hivemq.cloud"
 const int mqtt_port = 8883;
-const char* mqtt_user = "";
-const char* mqtt_pass = "";
+const char* mqtt_user = "YOUR_MQTT_USERNAME";
+const char* mqtt_pass = "YOUR_MQTT_PASSWORD";
 
 // MQTT Topics
 const char* topic_publish = "concentration/sensors";
@@ -29,7 +29,7 @@ const char* topic_publish = "concentration/sensors";
 // Sensor Pins
 #define DHT22_PIN 4
 #define PIR_PIN 17
-#define KY033_PIN 5
+#define KY038_PIN 5
 #define LDR_PIN 36
 
 DHT dht(DHT22_PIN, DHT22);
@@ -119,7 +119,7 @@ void setup() {
   dht.begin();
   analogSetAttenuation(ADC_11db); // Set ADC attenuation for 0-3.3V range
   pinMode(PIR_PIN, INPUT);
-  pinMode(KY033_PIN, INPUT);
+  pinMode(KY038_PIN, INPUT);
   // pinMode(LDR_PIN, INPUT); // Removed: analogRead does not require pinMode and it can interfere on some pins
 
   setup_wifi();
@@ -140,9 +140,17 @@ void loop() {
   float temp = dht.readTemperature();
   float hum = dht.readHumidity();
   int motion = digitalRead(PIR_PIN);
-  int line = digitalRead(KY033_PIN);
-  int light = analogRead(LDR_PIN);
-  Serial.print("Raw Light Value: ");
+  int noise = digitalRead(KY038_PIN);
+  
+  // Average Light Reading (Smoothing)
+  long lightSum = 0;
+  for(int i=0; i<10; i++) {
+    lightSum += analogRead(LDR_PIN);
+    delay(5); // Small delay for stability
+  }
+  int light = lightSum / 10;
+
+  Serial.print("Smoothed Light Value: ");
   Serial.println(light);
 
   if (isnan(temp) || isnan(hum)) {
@@ -155,7 +163,7 @@ void loop() {
   doc["temperature"] = temp;
   doc["humidity"] = hum;
   doc["motion"] = (motion == HIGH);
-  doc["lineDetected"] = (line == LOW);
+  doc["noiseDetected"] = (noise == HIGH); // KY-038 usually outputs HIGH when sound is detected
   doc["lightLevel"] = light;
   doc["timestamp"] = millis(); // Or use NTP for real timestamp
 
