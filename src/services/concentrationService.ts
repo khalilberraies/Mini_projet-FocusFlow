@@ -3,8 +3,9 @@ export interface SensorData {
   temperature: number;
   humidity: number;
   motion: boolean;
-  lineDetected: boolean;
+  noiseDetected: boolean;
   lightLevel: number;
+  cameraPresence?: boolean;
 }
 
 export interface AnalysisResult {
@@ -18,11 +19,10 @@ export function analyzeConcentration(data: SensorData): AnalysisResult {
   let issues: string[] = [];
   let status: 'optimal' | 'warning' | 'critical' = 'optimal';
 
-  // 1. Presence Detection (KY-033 Line Tracker used as proximity/desk sensor)
-  if (!data.lineDetected) {
-    score -= 70;
-    issues.push("User away from desk");
-    status = 'critical';
+  // 1. Noise Analysis (KY-038 Sound Sensor)
+  if (data.noiseDetected) {
+    score -= 30;
+    issues.push("High ambient noise");
   }
 
   // 2. Temperature Analysis (Ideal: 20-24°C)
@@ -47,7 +47,7 @@ export function analyzeConcentration(data: SensorData): AnalysisResult {
 
   // 4. Motion Analysis (PIR Sensor)
   // Constant motion might indicate restlessness or distractions
-  if (data.motion && data.lineDetected) {
+  if (data.motion) {
     score -= 10;
     issues.push("High activity detected");
   }
@@ -61,6 +61,13 @@ export function analyzeConcentration(data: SensorData): AnalysisResult {
     issues.push("Excessive glare detected");
   }
 
+  // 6. Camera Presence Detection
+  if (data.cameraPresence === false) {
+    score -= 80;
+    issues.push("User not at desk (Camera)");
+    status = 'critical';
+  }
+
   // Final score clamping
   score = Math.max(0, Math.min(100, Math.round(score)));
 
@@ -71,11 +78,7 @@ export function analyzeConcentration(data: SensorData): AnalysisResult {
   // Generate recommendation
   let recommendation = "Environment is optimal for deep focus.";
   if (issues.length > 0) {
-    if (!data.lineDetected) {
-      recommendation = "User not detected at workstation. Monitoring paused.";
-    } else {
-      recommendation = `Focus impacted: ${issues.slice(0, 2).join(" & ")}.`;
-    }
+    recommendation = `Focus impacted: ${issues.slice(0, 2).join(" & ")}.`;
   }
 
   return { score, recommendation, status };
